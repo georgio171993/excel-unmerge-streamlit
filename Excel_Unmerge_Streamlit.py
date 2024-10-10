@@ -8,6 +8,7 @@ def process_excel(file):
     wb = openpyxl.load_workbook(file)
     ws = wb.active
     
+    # Unmerge cells and handle the unmerged values
     for merge in list(ws.merged_cells.ranges):
         min_row, min_col, max_row, max_col = merge.min_row, merge.min_col, merge.max_row, merge.max_col
         
@@ -20,9 +21,16 @@ def process_excel(file):
                 if row == min_row and col == min_col:
                     continue
                 ws.cell(row=row, column=col).value = None
+    
+    # Condition to replace 'N/A' with blanks
+    for row in ws.iter_rows():
+        for cell in row:
+            if cell.value == 'N/A':
+                cell.value = ''
 
-    today_date = datetime.today().strftime('%Y-%m-%d')
-    output_file = f"unmerged_output_{today_date}.xlsx"
+    # Create output file name with the current date and time
+    current_time = datetime.now().strftime('%d %b %Y %H:%M')
+    output_file = f"Questionnaire Answers - {current_time}.xlsx"
     
     wb.save(output_file)
     return output_file
