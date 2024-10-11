@@ -26,10 +26,14 @@ def process_excel(file):
     st.write("Unmerging cells in columns: 1_2_2, 1_2_3, 1_4_2, 1_4_3, 1_5_4...")
     
     for merge in list(ws.merged_cells.ranges):
-        min_row, min_col, max_row, max_col = merge.min_row, merge.min_col, merge.max_row, max_col
-        
-        if min_col in unmerge_columns:
-            ws.unmerge_cells(start_row=min_row, start_column=min_col, end_row=max_row, end_column=max_col)
+        # Ensure we're unpacking valid ranges
+        try:
+            min_row, min_col, max_row, max_col = merge.bounds
+            if min_col in unmerge_columns:
+                ws.unmerge_cells(start_row=min_row, start_column=min_col, end_row=max_row, end_column=max_col)
+        except AttributeError:
+            # Skip invalid or unexpected merge ranges
+            continue
 
     # 3. Replace "Metric Ton" with blank in specified columns (1_5_8, 1_5_9, 1_5_12)
     replace_columns = ['1_5_9', '1_5_10', '1_5_12']  # Adjusted column names based on inspection
@@ -46,17 +50,20 @@ def process_excel(file):
     st.write("Unmerging other cells and handling values...")
     
     for merge in list(ws.merged_cells.ranges):
-        min_row, min_col, max_row, max_col = merge.min_row, merge.min_col, merge.max_row, merge.max_col
-        
-        ws.unmerge_cells(start_row=min_row, start_column=min_col, end_row=max_row, end_column=max_col)
-        
-        first_cell_value = ws.cell(row=min_row, column=min_col).value
-        
-        for row in range(min_row, max_row + 1):
-            for col in range(min_col, max_col + 1):
-                if row == min_row and col == min_col:
-                    continue
-                ws.cell(row=row, column=col).value = None
+        # Ensure we're unpacking valid ranges
+        try:
+            min_row, min_col, max_row, max_col = merge.bounds
+            ws.unmerge_cells(start_row=min_row, start_column=min_col, end_row=max_row, end_column=max_col)
+            
+            first_cell_value = ws.cell(row=min_row, column=min_col).value
+            
+            for row in range(min_row, max_row + 1):
+                for col in range(min_col, max_col + 1):
+                    if row == min_row and col == min_col:
+                        continue
+                    ws.cell(row=row, column=col).value = None
+        except AttributeError:
+            continue
     
     # 5. Condition to replace 'N/A' with blanks
     st.write("Replacing 'N/A' with blanks...")
