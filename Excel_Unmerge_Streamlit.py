@@ -11,18 +11,18 @@ def process_excel(file):
     st.write("Merging rows under 1_3_1_1 and 1_3_3 if 1_2_3 is the same...")
     
     for row in range(2, ws.max_row + 1):  # Assuming first row is header
-        # Column indexes: 1_2_3 -> 3rd column, 1_3_1_1 -> 4th column, 1_3_3 -> 6th column
-        if ws.cell(row=row, column=3).value == ws.cell(row=row-1, column=3).value:  # 1_2_3 is the 3rd column
-            # Merge 1_3_1_1 (Column 4) if values are the same
-            if ws.cell(row=row, column=4).value == ws.cell(row=row-1, column=4).value:  # 1_3_1_1 is the 4th column
-                ws.merge_cells(start_row=row-1, start_column=4, end_row=row, end_column=4)
+        # Column indexes: 1_2_3 -> 12th column, 1_3_1_1 -> 18th column, 1_3_3 -> 20th column
+        if ws.cell(row=row, column=12).value == ws.cell(row=row-1, column=12).value:  # 1_2_3 is the 12th column
+            # Merge 1_3_1_1 (Column 18) if values are the same
+            if ws.cell(row=row, column=18).value == ws.cell(row=row-1, column=18).value:  # 1_3_1_1 is the 18th column
+                ws.merge_cells(start_row=row-1, start_column=18, end_row=row, end_column=18)
             
-            # Merge 1_3_3 (Column 6) if values are the same
-            if ws.cell(row=row, column=6).value == ws.cell(row=row-1, column=6).value:  # 1_3_3 is the 6th column
-                ws.merge_cells(start_row=row-1, start_column=6, end_row=row, end_column=6)
+            # Merge 1_3_3 (Column 20) if values are the same
+            if ws.cell(row=row, column=20).value == ws.cell(row=row-1, column=20).value:  # 1_3_3 is the 20th column
+                ws.merge_cells(start_row=row-1, start_column=20, end_row=row, end_column=20)
 
     # 2. Unmerge values in the specified columns
-    unmerge_columns = [2, 3, 7, 8, 11, 12]  # Columns for 1_2_2, 1_2_3, 1_4_2, 1_4_3, 1_5_4
+    unmerge_columns = [11, 12, 44, 45, 57]  # Columns for 1_2_2, 1_2_3, 1_4_2, 1_4_3, 1_5_4
     st.write("Unmerging cells in columns: 1_2_2, 1_2_3, 1_4_2, 1_4_3, 1_5_4...")
     
     for merge in list(ws.merged_cells.ranges):
@@ -32,15 +32,14 @@ def process_excel(file):
             ws.unmerge_cells(start_row=min_row, start_column=min_col, end_row=max_row, end_column=max_col)
 
     # 3. Replace "Metric Ton" with blank in specified columns (1_5_8, 1_5_9, 1_5_12)
-    replace_columns = [9, 10, 13]  # Columns for 1_5_8, 1_5_9, 1_5_12
-    st.write("Replacing 'Metric Ton' with blanks in columns: 1_5_8, 1_5_9, 1_5_12...")
-    
+replace_columns = ['1_5_9', '1_5_10', '1_5_12']  # Adjusted column names based on inspection
     for row in ws.iter_rows():
-        for col_idx in replace_columns:
-            cell_value = row[col_idx-1].value  # Adjust column index (0-based)
+        for col_header in replace_columns:
+            col_idx = ws[1].index(col_header) + 1  # Find the column index based on header
+            cell_value = row[col_idx-1].value
             if isinstance(cell_value, str) and "Metric Ton" in cell_value:
-                row[col_idx-1].value = cell_value.replace("Metric Ton", "").strip()
-
+                row[col_idx-1].value = cell_value.replace(" Metric Ton", "").strip()
+    
     # 4. Unmerge cells and handle the unmerged values (existing logic)
     st.write("Unmerging other cells and handling values...")
     
