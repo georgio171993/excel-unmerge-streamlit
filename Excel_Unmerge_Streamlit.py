@@ -15,7 +15,7 @@ def process_excel(file):
         cell_1_4_9 = ws.cell(row=row, column=51)   # '1_4_9' is the 51st column
         cell_1_1_9 = ws.cell(row=row, column=9)    # '1_1_9' is the 9th column
         
-        if cell_1_4_10.value == 'N/A':
+        if cell_1_4_10.value == 'N/A' and cell_1_4_9.value != 'N/A':
             cell_1_4_10.value = cell_1_1_9.value  # Replace '1_4_10' with the value from '1_1_9'
     
     # 1. Unmerge cells and handle the unmerged values (existing logic)
