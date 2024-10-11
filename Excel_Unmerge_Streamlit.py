@@ -7,7 +7,18 @@ def process_excel(file):
     wb = openpyxl.load_workbook(file)
     ws = wb.active
 
-    # 1. Unmerge cells and handle the unmerged values (existing logic)
+    # 1. Replace '1_4_10' value with '1_1_9' if '1_4_10' is '' and '1_4_9' is not 'N/A'
+    st.write("Applying the condition for '1_4_10' and '1_4_9'...")
+    
+    for row in range(2, ws.max_row + 1):  # Assuming the first row is the header
+        cell_1_4_10 = ws.cell(row=row, column=52)  # '1_4_10' is the 52nd column
+        cell_1_4_9 = ws.cell(row=row, column=51)   # '1_4_9' is the 51st column
+        cell_1_1_9 = ws.cell(row=row, column=9)    # '1_1_9' is the 9th column
+        
+        if cell_1_4_10.value == 'N/A' and cell_1_4_9.value != 'N/A':
+            cell_1_4_10.value = cell_1_1_9.value  # Replace '1_4_10' with the value from '1_1_9'
+    
+    # 2. Unmerge cells and handle the unmerged values (existing logic)
     st.write("Unmerging other cells and handling values...")
     
     for merge in list(ws.merged_cells.ranges):
@@ -23,24 +34,13 @@ def process_excel(file):
                     continue
                 ws.cell(row=row, column=col).value = None
     
-    # 2. Condition to replace 'N/A' with blanks
+    # 3. Condition to replace 'N/A' with blanks
     st.write("Replacing 'N/A' with blanks...")
     
     for row in ws.iter_rows():
         for cell in row:
             if cell.value == 'N/A':
                 cell.value = ''
-
-    # 3. Replace '1_4_10' value with '1_1_9' if '1_4_10' is '' and '1_4_9' is not 'N/A'
-    st.write("Applying the condition for '1_4_10' and '1_4_9'...")
-    
-    for row in range(2, ws.max_row + 1):  # Assuming the first row is the header
-        cell_1_4_10 = ws.cell(row=row, column=52)  # '1_4_10' is the 52nd column
-        cell_1_4_9 = ws.cell(row=row, column=51)   # '1_4_9' is the 51st column
-        cell_1_1_9 = ws.cell(row=row, column=9)    # '1_1_9' is the 9th column
-        
-        if cell_1_4_10.value == '' and cell_1_4_9.value != 'N/A':
-            cell_1_4_10.value = cell_1_1_9.value  # Replace '1_4_10' with the value from '1_1_9'
 
     # Create output file name with the current date and time
     current_time = datetime.now().strftime('%d %b %Y %H:%M')
