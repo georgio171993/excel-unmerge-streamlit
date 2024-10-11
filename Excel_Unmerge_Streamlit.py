@@ -26,16 +26,18 @@ def process_excel(file):
     st.write("Unmerging cells in columns: 1_2_2, 1_2_3, 1_4_2, 1_4_3, 1_5_4...")
     
     for merge in list(ws.merged_cells.ranges):
-        min_row, min_col, max_row, max_col = merge.min_row, merge.min_col, merge.max_row, merge.max_col
+        min_row, min_col, max_row, max_col = merge.min_row, merge.min_col, merge.max_row, max_col
         
         if min_col in unmerge_columns:
             ws.unmerge_cells(start_row=min_row, start_column=min_col, end_row=max_row, end_column=max_col)
 
     # 3. Replace "Metric Ton" with blank in specified columns (1_5_8, 1_5_9, 1_5_12)
-replace_columns = ['1_5_9', '1_5_10', '1_5_12']  # Adjusted column names based on inspection
+    replace_columns = ['1_5_9', '1_5_10', '1_5_12']  # Adjusted column names based on inspection
+    st.write("Replacing 'Metric Ton' with blanks in columns...")
+    
     for row in ws.iter_rows():
         for col_header in replace_columns:
-            col_idx = ws[1].index(col_header) + 1  # Find the column index based on header
+            col_idx = [cell.value for cell in ws[1]].index(col_header) + 1  # Find the column index based on header
             cell_value = row[col_idx-1].value
             if isinstance(cell_value, str) and "Metric Ton" in cell_value:
                 row[col_idx-1].value = cell_value.replace(" Metric Ton", "").strip()
