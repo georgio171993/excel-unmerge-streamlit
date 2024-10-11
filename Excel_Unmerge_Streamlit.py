@@ -18,19 +18,43 @@ def process_excel(file):
     wb = openpyxl.load_workbook(file)
     ws = wb.active
 
-    # 3. Replace '1_4_10' value with '1_1_9' if '1_4_10' is blank and '1_4_8' is not blank
-    st.write("Applying the condition for blank values in '1_4_10' and '1_4_8'...")
+    # 3. Replace '1_4_10' value with '1_1_9' if '1_4_10' is blank and '1_4_4' is not blank
+    st.write("Applying the condition for blank values in '1_4_10' and '1_4_4'...")
     
     for row in range(2, ws.max_row + 1):  # Assuming the first row is the header
         cell_1_4_10 = ws.cell(row=row, column=52)  # '1_4_10' is the 52nd column
-        cell_1_4_8 = ws.cell(row=row, column=50)   # '1_4_8' is the 50th column (corrected)
+        cell_1_4_4 = ws.cell(row=row, column=46)   # '1_4_4' is the 46th column
         
         # Fetch the value from '1_1_9', considering merged cells
         cell_1_1_9_value = get_merged_cell_value(ws, row, 9)  # '1_1_9' is the 9th column
         
-        # Check if '1_4_10' is blank and '1_4_8' is not blank
-        if cell_1_4_10.value in [None, ""] and cell_1_4_8.value not in [None, ""]:
+        # Check if '1_4_10' is blank and '1_4_4' is not blank
+        if cell_1_4_10.value in [None, ""] and cell_1_4_4.value not in [None, ""]:
             cell_1_4_10.value = cell_1_1_9_value  # Replace '1_4_10' with the value from '1_1_9'
+            
+    # 1. Unmerge cells and handle the unmerged values (existing logic)
+    st.write("Unmerging other cells and handling values...")
+    
+    for merge in list(ws.merged_cells.ranges):
+        min_row, min_col, max_row, max_col = merge.min_row, merge.min_col, merge.max_row, merge.max_col
+        
+        ws.unmerge_cells(start_row=min_row, start_column=min_col, end_row=max_row, end_column=max_col)
+        
+        first_cell_value = ws.cell(row=min_row, column=min_col).value
+        
+        for row in range(min_row, max_row + 1):
+            for col in range(min_col, max_col + 1):
+                if row == min_row and col == min_col:
+                    continue
+                ws.cell(row=row, column=col).value = None
+    
+    # 2. Condition to replace 'N/A' with blanks
+    st.write("Replacing 'N/A' with blanks...")
+    
+    for row in ws.iter_rows():
+        for cell in row:
+            if cell.value == 'N/A':
+                cell.value = ''
 
     # Create output file name with the current date and time
     current_time = datetime.now().strftime('%d %b %Y %H:%M')
