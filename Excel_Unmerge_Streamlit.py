@@ -13,11 +13,11 @@ def process_excel(file):
         if ws.cell(row=row, column=3).value == ws.cell(row=row-1, column=3).value:  # 1_2_3 is the 3rd column
             # Merge 1_3_1_1 (Column 1) if values are the same
             if ws.cell(row=row, column=4).value == ws.cell(row=row-1, column=4).value:  # 1_3_1_1 is the 4th column
-                ws.merge_cells(start_row=row-1, start_column=4, end_row=row, start_column=4)
+                ws.merge_cells(start_row=row-1, start_column=4, end_row=row, end_column=4)
             
             # Merge 1_3_3 (Column 5) if values are the same
             if ws.cell(row=row, column=6).value == ws.cell(row=row-1, column=6).value:  # 1_3_3 is the 6th column
-                ws.merge_cells(start_row=row-1, start_column=6, end_row=row, start_column=6)
+                ws.merge_cells(start_row=row-1, start_column=6, end_row=row, end_column=6)
 
     # 2. Unmerge values in the specified columns
     unmerge_columns = [2, 3, 7, 8]  # Columns for 1_2_2, 1_2_3, 1_4_2, 1_4_3
