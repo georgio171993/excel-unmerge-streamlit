@@ -23,7 +23,7 @@ def process_excel(file):
     
     for row in range(2, ws.max_row + 1):  # Assuming the first row is the header
         cell_1_4_10 = ws.cell(row=row, column=52)  # '1_4_10' is the 52nd column
-        cell_1_4_4 = ws.cell(row=row, column=46)   # '1_4_4' is the 46th column
+        cell_1_4_4 = ws.cell(row=row, column=46)   # '1_4_4' is the 46th column (corrected)
         
         # Fetch the value from '1_1_9', considering merged cells
         cell_1_1_9_value = get_merged_cell_value(ws, row, 9)  # '1_1_9' is the 9th column
