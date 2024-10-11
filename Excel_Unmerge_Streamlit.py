@@ -13,6 +13,18 @@ def get_merged_cell_value(ws, row, col):
                 return ws.cell(merge.min_row, merge.min_col).value
     return cell.value
 
+# Function to set the value of a cell, accounting for merged cells
+def set_merged_cell_value(ws, row, col, value):
+    """Set the value of a cell, handling merged cells."""
+    # Check if the cell is part of a merged range
+    for merge in ws.merged_cells.ranges:
+        if (merge.min_row <= row <= merge.max_row) and (merge.min_col <= col <= merge.max_col):
+            # Set the value only in the top-left cell of the merged range
+            ws.cell(merge.min_row, merge.min_col).value = value
+            return
+    # If the cell is not part of a merged range, set the value directly
+    ws.cell(row=row, column=col).value = value
+
 # Function to process the Excel file
 def process_excel(file):
     wb = openpyxl.load_workbook(file)
@@ -23,14 +35,14 @@ def process_excel(file):
     
     for row in range(2, ws.max_row + 1):  # Assuming the first row is the header
         cell_1_4_10 = ws.cell(row=row, column=52)  # '1_4_10' is the 52nd column
-        cell_1_4_4 = ws.cell(row=row, column=46)   # '1_4_4' is the 46th column (corrected)
+        cell_1_4_4 = ws.cell(row=row, column=46)   # '1_4_4' is the 46th column
         
         # Fetch the value from '1_1_9', considering merged cells
         cell_1_1_9_value = get_merged_cell_value(ws, row, 9)  # '1_1_9' is the 9th column
         
         # Check if '1_4_10' is blank and '1_4_4' is not blank
         if cell_1_4_10.value in [None, ""] and cell_1_4_4.value not in [None, ""]:
-            cell_1_4_10.value = cell_1_1_9_value  # Replace '1_4_10' with the value from '1_1_9'
+            set_merged_cell_value(ws, row, 52, cell_1_1_9_value)  # Replace '1_4_10' with the value from '1_1_9'
             
     # 1. Unmerge cells and handle the unmerged values (existing logic)
     st.write("Unmerging other cells and handling values...")
